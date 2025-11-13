@@ -1,24 +1,6 @@
-function submitEnquiry() {
-  const name = document.getElementById('enquiry-name').value;
-  const email = document.getElementById('enquiry-email').value;
-  const subject = document.getElementById('enquiry-subject').value;
-  const message = document.getElementById('enquiry-message').value;
 
-  if (!name || !email || !subject || !message) {
-    alert("⚠️ Please fill out all fields before submitting.");
-    return;
-  }
 
-  // Send email using mailto link (basic)
-  const mailtoLink = `mailto:nexwidgetsolutionsinfo@gmail.com?subject=Enquiry from ${name} - ${subject}&body=Name: ${name}%0AEmail: ${email}%0A%0A${message}`;
-  window.location.href = mailtoLink;
 
-  // Optional: clear form
-  document.getElementById('enquiry-name').value = "";
-  document.getElementById('enquiry-email').value = "";
-  document.getElementById('enquiry-subject').value = "";
-  document.getElementById('enquiry-message').value = "";
-}
 
 
 
