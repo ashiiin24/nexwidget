@@ -1,863 +1,159 @@
- * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #000000;
-            color: #fff;
-            overflow-x: hidden;
-        }
 
-        /* Navbar */
-        nav {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 1.5rem 5%;
-            z-index: 1000;
-            box-shadow: 0 4px 30px rgba(255, 255, 255, 0.1);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
 
-        .nav-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
 
-        .logo {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: #ffffff;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
 
-        .logo img {
-            height: 40px;
-            filter: brightness(1.2);
-        }
 
-        .nav-links {
-            display: flex;
-            gap: 2.5rem;
-            list-style: none;
-        }
 
-        .nav-links a {
-            color: #fff;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            position: relative;
-        }
+// === Three.js Basic Setup ===
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
 
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: #ffffff;
-            transition: width 0.3s ease;
-        }
+const container = document.getElementById('canvas-container');
+renderer.setSize(window.innerWidth, window.innerHeight);
+container.appendChild(renderer.domElement);
 
-        .nav-links a:hover::after {
-            width: 100%;
-        }
+// === Octahedron ===
+const geometry2 = new THREE.OctahedronGeometry(8, 0);
+const material2 = new THREE.MeshStandardMaterial({
+  color: 0x7d05b8,
+  wireframe: true,
+  transparent: true,
+  opacity: 0.5
+});
+const octahedron = new THREE.Mesh(geometry2, material2);
+scene.add(octahedron);
 
-        /* Hero Section */
-        #home {
-            position: relative;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
+// === Snub Disphenoid Geometry ===
+const vertices = [
+  [0.0, 0.618, 1.175], [0.0, -0.618, 1.175],
+  [0.851, 0.526, 0.526], [0.851, -0.526, 0.526],
+  [-0.851, 0.526, 0.526], [-0.851, -0.526, 0.526],
+  [0.526, 0.851, -0.526], [0.526, -0.851, -0.526],
+  [-0.526, 0.851, -0.526], [-0.526, -0.851, -0.526],
+  [0.618, 1.175, 0.0], [-0.618, 1.175, 0.0],
+  [0.618, -1.175, 0.0], [-0.618, -1.175, 0.0],
+];
+const faces = [
+  [0,2,4],[0,4,10],[0,10,6],[0,6,2],
+  [1,3,5],[1,5,12],[1,12,7],[1,7,3],
+  [2,3,7],[2,7,6],[3,2,0],[3,0,1],
+  [4,5,9],[4,9,8],[5,4,0],[5,0,1],
+  [6,7,13],[6,13,8],[7,6,2],[7,2,3]
+];
+const flatVertices = vertices.flat();
+const flatFaces = faces.flat();
 
-        #canvas-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
+const snubGeometry = new THREE.PolyhedronGeometry(flatVertices, flatFaces, 6, 0);
+const snubMaterial = new THREE.MeshStandardMaterial({
+  color: 0x7d05b8,
+  wireframe: true,
+  transparent: true,
+  opacity: 0.5
+});
+const snubDisphenoid = new THREE.Mesh(snubGeometry, snubMaterial);
+scene.add(snubDisphenoid);
 
-        .hero-content {
-            position: relative;
-            z-index: 2;
-            text-align: center;
-            padding: 2rem;
-        }
+// === Lighting ===
+const pointLight = new THREE.PointLight(0xffffff, 1);
+pointLight.position.set(20, 20, 20);
+scene.add(pointLight);
 
-        .hero-content h1 {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            color: #ffffff;
-            animation: fadeInUp 1s ease;
-            font-weight: 700;
-            letter-spacing: -1px;
-        }
+const ambientLight = new THREE.AmbientLight(0x404040, 2);
+scene.add(ambientLight);
 
-        .hero-content p {
-            font-size: 1.5rem;
-            margin-bottom: 2rem;
-            color: #a0a0a0;
-            animation: fadeInUp 1s ease 0.2s both;
-        }
+camera.position.z = 30;
 
-        .cta-button {
-            display: inline-block;
-            padding: 1rem 2.5rem;
-            background: linear-gradient(135deg, #a807f2 0%, #7d05b8 100%);
-            color: #ffffff;
-            text-decoration: none;
-            border-radius: 50px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            animation: fadeInUp 1s ease 0.4s both;
-            box-shadow: 0 10px 30px rgba(168, 7, 242, 0.4);
-        }
+// === Animation Variables for Horizontal Movement ===
+let clock = new THREE.Clock();
 
-        .cta-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(168, 7, 242, 0.6);
-            background: linear-gradient(135deg, #b820ff 0%, #8e06d1 100%);
-        }
+function animate() {
+  requestAnimationFrame(animate);
+  const time = clock.getElapsedTime();
 
-        /* Section Styles */
-        section {
-            padding: 6rem 5%;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
+  // Horizontal oscillation (left-right)
+  octahedron.position.x = Math.sin(time) * 10;       // amplitude 10
+  snubDisphenoid.position.x = Math.sin(time + Math.PI) * 10; // opposite phase
 
-        section h2 {
-            font-size: 3rem;
-            margin-bottom: 3rem;
-            text-align: center;
-            color: #ffffff;
-            font-weight: 700;
-        }
+  // Rotation
+  octahedron.rotation.x += 0.005;
+  octahedron.rotation.y += 0.01;
+  snubDisphenoid.rotation.x += 0.008;
+  snubDisphenoid.rotation.y += 0.012;
 
-        /* About Section */
-        .about-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4rem;
-            align-items: center;
-        }
-
-        .about-text p {
-            font-size: 1.1rem;
-            line-height: 1.8;
-            color: #b0b0b0;
-            margin-bottom: 1.5rem;
-        }
-
-        .about-image {
-            height: 400px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 5rem;
-            box-shadow: 0 20px 60px rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        /* Services Section */
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-
-        .service-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            padding: 2.5rem;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .service-card:hover {
-            transform: translateY(-10px);
-            border-color: rgba(255, 255, 255, 0.3);
-            background: rgba(214, 31, 231, 0.08);
-             box-shadow: 0 15px 40px rgba(168, 7, 242, 0.6);
-        }
-
-        .service-card h3 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            color: #ffffff;
-        }
-
-        .service-card p {
-            color: #b0b0b0;
-            line-height: 1.6;
-        }
-
-        /* Projects Section */
-        .projects-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 2rem;
-        }
-
-        .project-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .project-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(255, 255, 255, 0.15);
-        }
-
-        .project-image {
-            height: 200px;
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-        }
-
-        .project-info {
-            padding: 2rem;
-        }
-
-        .project-info h3 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .project-info p {
-            color: #b0b0b0;
-            line-height: 1.6;
-        }
-
-        /* Blogs Section */
-        .blogs-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-
-        .blog-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            padding: 2rem;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .blog-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(255, 255, 255, 0.15);
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        .blog-date {
-            color: #a0a0a0;
-            font-size: 0.9rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .blog-card h3 {
-            font-size: 1.3rem;
-            margin-bottom: 1rem;
-        }
-
-        .blog-card p {
-            color: #b0b0b0;
-            line-height: 1.6;
-            margin-bottom: 1rem;
-        }
-
-        .read-more {
-            color: #ffffff;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .read-more:hover {
-            color: #d0d0d0;
-        }
-
-      /* Team Section */
-.team-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
-    margin-top: 2rem;
+  renderer.render(scene, camera);
 }
+animate();
 
-/* Common team card */
-.team-card {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    padding: 2rem;
-    border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: all 0.3s ease;
-    text-align: center;
-}
-
-.team-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 20px 40px rgba(168, 7, 242, 0.3);
-    border-color: rgba(168, 7, 242, 0.5);
-}
-
-/* CEO & Co-founder cards */
-.ceo-card,
-.co-founder-card {
-    grid-column: span 2;
-    background: linear-gradient(135deg, rgba(168, 7, 242, 0.1) 0%, rgba(0, 0, 0, 0.3) 100%);
-    max-width: 700px;
-    margin: 0 auto;
-}
-
-/* Team image styling */
-.team-image {
-    width: 120px;
-    height: 120px;
-    background: rgba(168, 7, 242, 0.2);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 3rem;
-    margin: 0 auto 1.5rem;
-    border: 1px solid rgba(168, 7, 242, 0.3);
-    overflow: hidden;
-}
-
-.ceo-card .team-image,
-.co-founder-card .team-image {
-    width: 150px;
-    height: 150px;
-    font-size: 4rem;
-}
-
-/* Image inside team-image */
-.team-image img {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-}
-
-/* 👤 Fallback for missing images */
-.team-image img[onerror] {
-    display: block;
-}
-
-.team-image::before {
-    content: "👤";
-    position: absolute;
-    font-size: 3rem;
-    color: rgba(255, 255, 255, 0.4);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-}
-
-.team-image img {
-    position: relative;
-    z-index: 1;
-}
-
-/* Text content */
-.team-info h3 {
-    font-size: 1.5rem;
-    margin-bottom: 0.5rem;
-    color: #ffffff;
-}
-
-.team-role {
-    color: #a807f2;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    font-size: 1.1rem;
-}
-
-.team-bio {
-    color: #b0b0b0;
-    line-height: 1.6;
-    margin-bottom: 1rem;
-}
-
-.team-contact {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-top: 1rem;
-}
-
-.team-contact span {
-    color: #a0a0a0;
-    font-size: 0.9rem;
-}
-.team-contact a {
-    color: white;
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.3s ease;
-}
-.team-contact a:hover {
-    color: #00bcd4; /* light cyan hover effect */
-    text-decoration: underline;
-}
-/* Responsive fix */
-@media (max-width: 768px) {
-    .ceo-card,
-    .co-founder-card {
-        grid-column: span 1;
-        max-width: 100%;
-    }
-}
+// === Responsive Resize ===
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
 
 
-        /* Contact Section */
-        .contact-container {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 3rem;
-            align-items: start;
-        }
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
 
-        .contact-info {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            padding: 2.5rem;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
+        // Form submission functions
+        function submitEnquiry() {
+            const name = document.getElementById('enquiry-name').value;
+            const email = document.getElementById('enquiry-email').value;
+            const subject = document.getElementById('enquiry-subject').value;
+            const message = document.getElementById('enquiry-message').value;
 
-        .contact-info h3 {
-            font-size: 1.8rem;
-            margin-bottom: 2rem;
-            color: #a807f2;
-        }
-
-        .contact-item {
-            display: flex;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-            align-items: flex-start;
-        }
-
-        .contact-icon {
-            font-size: 2rem;
-            flex-shrink: 0;
-        }
-
-        .contact-item h4 {
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
-            color: #ffffff;
-        }
-
-        .contact-item p {
-            color: #b0b0b0;
-            line-height: 1.6;
-        }
-
-        .contact-forms {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-        }
-
-        .form-section {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            padding: 2rem;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .form-section h3 {
-            font-size: 1.5rem;
-            margin-bottom: 1.5rem;
-            color: #ffffff;
-        }
-
-        .contact-form {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .contact-form input,
-        .contact-form textarea,
-        .contact-form select {
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            color: #ffffff;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .contact-form input:focus,
-        .contact-form textarea:focus,
-        .contact-form select:focus {
-            outline: none;
-            border-color: #a807f2;
-            background: rgba(168, 7, 242, 0.1);
-        }
-
-        .contact-form textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        .submit-btn {
-            padding: 1rem 2rem;
-            background: linear-gradient(135deg, #a807f2 0%, #7d05b8 100%);
-            color: #ffffff;
-            border: none;
-            border-radius: 50px;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(168, 7, 242, 0.3);
-        }
-
-        .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(168, 7, 242, 0.5);
-        }
-
-        /* Animations */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .hero-content h1 {
-                font-size: 2.5rem;
+            if (!name || !email || !subject || !message) {
+                alert('Please fill in all fields');
+                return;
             }
 
-            .hero-content p {
-                font-size: 1.2rem;
-            }
-
-            .nav-links {
-                gap: 1.5rem;
-            }
-
-            .about-content {
-                grid-template-columns: 1fr;
-            }
-
-            section h2 {
-                font-size: 2rem;
-            }
-
-            .ceo-card {
-                grid-column: span 1;
-            }
-
-            .contact-container {
-                grid-template-columns: 1fr;
-            }
-
-            .contact-forms {
-                grid-template-columns: 1fr;
-            }
-        }}
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: linear-gradient(90deg, #a807f2, #ff00ff, #7d05b8);
-            transition: width 0.3s ease;
+            alert('Thank you for your enquiry! We will get back to you soon.');
+            // Reset form
+            document.getElementById('enquiry-name').value = '';
+            document.getElementById('enquiry-email').value = '';
+            document.getElementById('enquiry-subject').value = '';
+            document.getElementById('enquiry-message').value = '';
         }
 
-        .nav-links a:hover {
-            background: linear-gradient(90deg, #a807f2, #ff00ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        function submitAppointment() {
+            const name = document.getElementById('appt-name').value;
+            const email = document.getElementById('appt-email').value;
+            const phone = document.getElementById('appt-phone').value;
+            const date = document.getElementById('appt-date').value;
+            const time = document.getElementById('appt-time').value;
+            const type = document.getElementById('appt-type').value;
+
+            if (!name || !email || !phone || !date || !time || !type) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            alert(`Appointment booked successfully!\n\nName: ${name}\nDate: ${date}\nTime: ${time}\nType: ${type}\n\nWe'll send you a confirmation email shortly.`);
+            // Reset form
+            document.getElementById('appt-name').value = '';
+            document.getElementById('appt-email').value = '';
+            document.getElementById('appt-phone').value = '';
+            document.getElementById('appt-date').value = '';
+            document.getElementById('appt-time').value = '';
+            document.getElementById('appt-type').value = '';
         }
+        // Mobile Navbar Toggle
+const navToggle = document.getElementById('nav-toggle');
+const navLinks = document.getElementById('nav-links');
 
-        .nav-links a:hover::after {
-            width: 100%;
-        }
-
-
-
-        /* Hamburger Button */
-.nav-toggle {
-    display: none;
-    font-size: 2rem;
-    color: #ffffff;
-    cursor: pointer;
-}
-
-/* Mobile nav */
-@media (max-width: 768px) {
-    .nav-links {
-        position: absolute;
-        top: 100%;
-        right: 0;
-        background: rgba(0,0,0,0.95);
-        flex-direction: column;
-        width: 200px;
-        gap: 1rem;
-        padding: 1rem;
-        border-radius: 0 0 10px 10px;
-        display: none; /* hidden by default */
-    }
-
-    .nav-links.show {
-        display: flex;
-    }
-
-    .nav-toggle {
-        display: block;
-    }
-
-    .nav-links li {
-        text-align: center;
-    }
-}
-
-
-
-.team-contact a {
-    color: white;
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.3s ease;
-}
-
-.team-contact a:hover {
-    color: #00bcd4; /* light cyan hover effect */
-    text-decoration: underline;
-}
-
-/* Blog Section Styles */
-#blogs {
-    padding: 4rem 2rem;
-    text-align: center;
-}
-
-.blogs-grid {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 2rem;
-    margin-top: 2rem;
-}
-
-.blog-card {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    border-radius: 20px;
-    padding: 2rem;
-    max-width: 400px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.blog-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-}
-
-.blog-date {
-    color: #00bcd4;
-    font-weight: bold;
-    margin-bottom: 1rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.blog-info h3 {
-    color: #fff;
-    margin-bottom: 0.8rem;
-    font-size: 1.3rem;
-}
-
-.blog-info p {
-    color: #ddd;
-    font-size: 1rem;
-    line-height: 1.6;
-}
-
-
-
-
-
-#contact {
-  padding: 4rem 2rem;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  border-radius: 20px;
-  color: white;
-  text-align: center;
-}
-
-.contact-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 2rem;
-  margin-top: 2rem;
-}
-
-.contact-info, .form-section {
-  flex: 1 1 300px;
-  background: rgba(255, 255, 255, 0.08);
-  padding: 2rem;
-  border-radius: 15px;
-  text-align: left;
-}
-
-.contact-form input, .contact-form textarea {
-  width: 100%;
-  margin: 0.5rem 0;
-  padding: 0.8rem;
-  border: none;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-}
-
-.contact-form input::placeholder, .contact-form textarea::placeholder {
-  color: #ccc;
-}
-
-.submit-btn {
-  background-color: #00bcd4;
-  color: white;
-  border: none;
-  padding: 0.8rem 1.5rem;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: 0.3s ease;
-}
-
-.submit-btn:hover {
-  background-color: #0097a7;
-}
-
-
-
-
-
-
-/* Footer Styles */
-#footer {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  color: white;
-  padding: 3rem 2rem;
-  text-align: center;
-  margin-top: 3rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.footer-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 3rem;
-  max-width: 1100px;
-  margin: auto;
-  text-align: left;
-}
-
-.footer-about, .footer-links, .footer-contact {
-  flex: 1 1 250px;
-}
-
-.footer-links ul {
-  list-style: none;
-  padding: 0;
-}
-
-.footer-links li {
-  margin: 0.5rem 0;
-}
-
-.footer-links a,
-.footer-contact a {
-  color: white;
-  text-decoration: none;
-  transition: 0.3s ease;
-}
-
-.footer-links a:hover,
-.footer-contact a:hover {
-  color: #00bcd4;
-  text-decoration: underline;
-}
-
-.footer-bottom {
-  margin-top: 2rem;
-  font-size: 0.9rem;
-  opacity: 0.8;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 1rem;
-}
-
-.about-image img {
-    max-width: 100%;
-    height: auto;
-}
+navToggle.addEventListener('click', () => {
+    navLinks.classList.toggle('show');
+});
+const amplitude = window.innerWidth < 768 ? 5 : 10;
+octahedron.position.x = Math.sin(time) * amplitude;
+snubDisphenoid.position.x = Math.sin(time + Math.PI) * amplitude;
